@@ -1,0 +1,17 @@
+{
+  "name": "banco-digital-cypress-qa",
+  "version": "1.0.0",
+  "description": "Testes de um banco digital com Cypress: tela, API e acessibilidade",
+  "scripts": {
+    "test": "cypress run --browser edge",
+    "test:defeitos": "cypress run --browser edge --config specPattern=cypress/e2e/defeitos/**/*.cy.js",
+    "open": "cypress open"
+  },
+  "type": "commonjs",
+  "devDependencies": {
+    "axe-core": "^4.14.0",
+    "cypress": "^15.21.1",
+    "cypress-axe": "^1.7.0"
+  },
+  "license": "MIT"
+}

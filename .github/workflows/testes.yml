@@ -1,0 +1,50 @@
+name: Testes
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  # O ParaBank é público e pode mudar sem aviso: roda toda segunda de manhã.
+  schedule:
+    - cron: "0 11 * * 1"
+
+jobs:
+  regressao:
+    name: Regressão
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Roda a regressão
+        run: npx cypress run --browser chrome
+      - name: Guarda os prints das falhas
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prints-regressao
+          path: cypress/screenshots
+          retention-days: 14
+
+  defeitos:
+    name: Defeitos abertos (falham de propósito)
+    needs: regressao
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Estes testes descrevem o comportamento correto que o sistema ainda não tem.
+    # Falhar aqui é o esperado; o job fica amarelo e não bloqueia nada.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Roda a suíte de defeitos abertos
+        run: npx cypress run --browser chrome --config specPattern=cypress/e2e/defeitos/**/*.cy.js
